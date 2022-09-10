@@ -29,6 +29,11 @@ char * bsor_read_string_file(FILE *fp) {
     char * string = NULL;
     // strings are stored as [length][string] so read the length first
     fread(&string_length, sizeof(int), 1, fp);
+    // hacky workaround for broken unicode
+    if (string_length < 0 || string_length > 0x200) {
+        fseek(fp, -3, SEEK_CUR);
+        return bsor_read_string_file(fp);
+    }
     // allocate some memory for the string and read the string afterwards
     string = malloc(string_length + 1);
     if (string != NULL) {
