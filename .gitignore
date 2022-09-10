@@ -1,0 +1,15 @@
+# i hate macos
+.DS_Store
+# executable leftovers
+*.dylib
+*.so
+*.dll
+*.exe
+libbsor
+bsortool
+# debugging leftovers
+*.pdb
+*.map
+*.dSYM
+# leftover bsor files
+*.bsor
