@@ -27,11 +27,12 @@ float bsor_read_float_file(FILE *fp) {
 char * bsor_read_string_file(FILE *fp) {
     int string_length = 0;
     char * string = NULL;
+    char temp_string[0x200];
     // strings are stored as [length][string] so read the length first
     fread(&string_length, sizeof(int), 1, fp);
-    // hacky workaround for broken unicode
-    if (string_length < 0 || string_length > 0x200) {
-        fseek(fp, -3, SEEK_CUR);
+    // hacky workaround for broken strings
+    if (string_length < 0 || string_length > 0x100) {
+        fseek(fp, -6, SEEK_CUR);
         return bsor_read_string_file(fp);
     }
     // allocate some memory for the string and read the string afterwards
@@ -39,6 +40,19 @@ char * bsor_read_string_file(FILE *fp) {
     if (string != NULL) {
         fread(string, 1, string_length, fp);
         string[string_length] = 0; // cap off the string with a null byte
+    }
+    // hacky workaround for broken unicode, read the string and run strlen
+    if (string != NULL && fgetc(fp) > 0x64) {
+        fseek(fp, -string_length - 1, SEEK_CUR);
+        fread(temp_string, 1, sizeof(temp_string), fp);
+        fseek(fp, -sizeof(temp_string), SEEK_CUR);
+        string_length = strlen(temp_string) - 1;
+        string = realloc(string, string_length + 1);
+        fread(string, 1, string_length, fp);
+        string[string_length] = 0;
+    } else {
+        // seek back once cause we ran fgetc()
+        fseek(fp, -1, SEEK_CUR);
     }
     // return the string we allocated
     return string;
