@@ -61,8 +61,8 @@ void bsor_read_metadata_file(FILE *fp, BSOR *bsor) {
     if (metadata_magic != 0)
         return;
     // read system metadata (game + mod versions)
-    bsor->system.game_version = bsor_read_string_file(fp);
     bsor->system.mod_version = bsor_read_string_file(fp);
+    bsor->system.game_version = bsor_read_string_file(fp);
     // read play start time and convert to integer
     char *start_time_str = bsor_read_string_file(fp);
     sscanf(start_time_str, "%llu", &bsor->play.start_timestamp);
